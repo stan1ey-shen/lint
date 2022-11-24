@@ -17,18 +17,18 @@ jobs:
         id: image-cache
         uses: actions/cache@v3
         with:
-          path: super-linter
+          path: ~/super-linter
           key: ${{ runner.os }}-super-linter
 
       - name: Create cache
         if: steps.image-cache.outputs.cache-hit != 'true'
         run: |
           docker pull ghcr.io/github/super-linter:v4.9.7
-          docker save -o super-linter/super-linter.tar ghcr.io/github/super-linter
+          docker save -o ~/super-linter/super-linter.tar ghcr.io/github/super-linter
 
       - name: Load cache
         if: steps.image-cache.outputs.cache-hit == 'true'
-        run: docker load -i super-linter/super-linter.tar
+        run: docker load -i ~/super-linter/super-linter.tar
         
   build:
     needs: cache
