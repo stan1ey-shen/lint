@@ -1,6 +1,7 @@
 name: Lint Code Base
 
 on:
+  workflow_dispatch:
   push:
     branches: [master, main]
   pull_request:
@@ -17,21 +18,22 @@ jobs:
         with:
           fetch-depth: 0
       
-      - run: mkdir -p ~/image-cache
-
-      - id: image-cache
-        uses: actions/cache@v1
+      - name: Cache super-linter
+        id: image-cache
+        uses: actions/cache@v3
         with:
-          path: ~/image-cache
-          key: image-cache-${{ runner.os }}
+          path: super-linter
+          key: ${{ runner.os }}-super-linter
 
-      - if: steps.image-cache.outputs.cache-hit != 'true'
+      - name: Create cache
+        if: steps.image-cache.outputs.cache-hit != 'true'
         run: |
           docker pull ghcr.io/github/super-linter:v4.9.7
-          docker save -o ~/image-cache/super-linter.tar ghcr.io/github/super-linter
+          docker save -o super-linter/super-linter.tar ghcr.io/github/super-linter
 
-      - if: steps.image-cache.outputs.cache-hit == 'true'
-        run: docker load -i ~/image-cache/super-linter.tar
+      - name: Load cache
+        if: steps.image-cache.outputs.cache-hit == 'true'
+        run: docker load -i super-linter/super-linter.tar
       
       - name: Lint Code Base
         uses: github/super-linter@v4
