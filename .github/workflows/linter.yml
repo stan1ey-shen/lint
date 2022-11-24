@@ -24,7 +24,7 @@ jobs:
       - name: Create cache
         if: steps.image-cache.outputs.cache-hit != 'true'
         run: |
-          docker pull ghcr.io/github/super-linter:v4.9.7
+          docker pull alpine:latest
           docker save -o ~/super-linter/super-linter.tar ghcr.io/github/super-linter
 
       - name: Load cache
