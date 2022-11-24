@@ -8,8 +8,8 @@ on:
     branches: [master, main]
 
 jobs:
-  build:
-    name: Lint Code Base
+  cache:
+    name: Cache
     runs-on: ubuntu-latest
 
     steps:     
@@ -29,7 +29,13 @@ jobs:
       - name: Load cache
         if: steps.image-cache.outputs.cache-hit == 'true'
         run: docker load -i super-linter/super-linter.tar
+        
+  build:
+    needs: cache
+    name: Lint Code Base
+    runs-on: ubuntu-latest
 
+    steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
