@@ -12,7 +12,8 @@ jobs:
     name: Cache
     runs-on: ubuntu-latest
 
-    steps:     
+    steps:
+      - run: mkdir -p ~/super-linter
       - name: Cache super-linter
         id: image-cache
         uses: actions/cache@v3
