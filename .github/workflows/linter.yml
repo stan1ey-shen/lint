@@ -25,7 +25,7 @@ jobs:
         if: steps.image-cache.outputs.cache-hit != 'true'
         run: |
           docker pull alpine:latest
-          docker save -o ~/super-linter/super-linter.tar ghcr.io/github/super-linter
+          docker save -o ~/super-linter/super-linter.tar alpine:latest
 
       - name: Load cache
         if: steps.image-cache.outputs.cache-hit == 'true'
