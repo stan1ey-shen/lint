@@ -7,38 +7,28 @@ on:
   pull_request:
     branches: [master, main]
 
-jobs:     
-  build:
-    name: Lint Code Base
+jobs:
+  cache:
+    name: Cache
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - run: mkdir -p ~/super-linter
+      - name: Cache super-linter
+        id: image-cache
+        uses: actions/cache@v3
         with:
-          fetch-depth: 0
+          path: ~/super-linter
+          key: ${{ runner.os }}-super-linter
 
-      - name: MegaLinter
-        id: ml
-        # You can override MegaLinter flavor used to have faster performances
-        # More info at https://megalinter.io/flavors/
-        uses: oxsecurity/megalinter/flavors/dotnet@beta
-        env:
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} # Validates all source when push on main, else just the git diff with main. Override with true if you always want to lint all sources
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Lint Code Base
-        uses: github/super-linter@v4
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: master
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Lint Slim Code Base
-        uses: github/super-linter/slim@v4
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: master
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create cache
+        if: steps.image-cache.outputs.cache-hit != 'true'
+        run: |
+          docker pull ghcr.io/github/super-linter:v4.9.7
+          docker save -o ~/super-linter/super-linter.tar ghcr.io/github/super-linter
 
-      - run: df -ha
+      - name: Load cache
+        if: steps.image-cache.outputs.cache-hit == 'true'
+        run: docker load -i ~/super-linter/super-linter.tar
+      
+      - run: docker images
