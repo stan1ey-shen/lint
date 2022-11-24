@@ -14,21 +14,11 @@ jobs:
 
     steps:
       - run: mkdir -p ~/super-linter
-      - name: Cache super-linter
-        id: image-cache
-        uses: actions/cache@v3
-        with:
-          path: ~/super-linter
-          key: ${{ runner.os }}-super-linter
-
       - name: Create cache
-        if: steps.image-cache.outputs.cache-hit != 'true'
-        run: |
-          docker pull postgres:latest
-          docker save -o ~/super-linter/super-linter.tar postgres:latest
+        run: docker pull postgres:latest
 
-      - name: Load cache
-        if: steps.image-cache.outputs.cache-hit == 'true'
-        run: docker load -i ~/super-linter/super-linter.tar
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
       
       - run: docker images
